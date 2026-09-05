@@ -1,4 +1,4 @@
-# Fist-Grip Swim Paddle
+# Fist-Grip Swim Paddle -- [see the project here](https://agezao.github.io/fist-grip-paddle/)
 
 A 3D-printable swim paddle held by a bar inside a closed fist, instead of strapped flat to an open palm.
 
