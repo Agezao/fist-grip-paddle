@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+._*
+
+# OpenSCAD
+*.bak
+*.scad.stl
+
+# editors
+.vscode/
+.idea/
+
+# source video — 96 MB, not served by the site.
+# img/test-run-web.mp4 (8.7 MB) is what index.html plays.
+img/test-run.mp4

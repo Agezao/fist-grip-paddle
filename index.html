@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fist-Grip Swim Paddle — an open adaptive paddle for swimmers with hemiplegia</title>
+<meta name="description" content="A 3D-printable swim paddle held by a bar inside a closed fist. Designed for swimmers with hemiplegia, where spasticity holds the hand closed and an ordinary paddle assumes an open palm and a working grip. Parametric OpenSCAD source, field tested.">
+<meta name="color-scheme" content="light dark">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Fist-Grip Swim Paddle">
+<meta property="og:description" content="An open-source, 3D-printable swim paddle that a closed fist can use — no grip strength required for propulsion.">
+<meta property="og:image" content="img/assembled_fist_paddle.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
+      colors: {
+        ink:  { 950:'#080f14', 900:'#0d181f', 800:'#13242e', 700:'#1c3542' },
+        pool: { 50:'#eefcfb', 100:'#d3f6f4', 200:'#abecea', 300:'#71dcdb', 400:'#37c3c4', 500:'#1ba6a9', 600:'#128589', 700:'#136a6f', 800:'#15555a', 900:'#16474b' },
+        rig:  { 400:'#ff9d4d', 500:'#f97316', 600:'#e35c05' },
+      },
+    },
+  },
+}
+</script>
+<style type="text/tailwindcss">
+  @layer utilities {
+    .wrap { @apply mx-auto w-full max-w-6xl px-5 sm:px-8; }
+    .prose-narrow { @apply max-w-[68ch]; }
+    .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.18em] text-pool-700 dark:text-pool-300; }
+    .h2 { @apply text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-white; }
+    .lede { @apply text-lg leading-relaxed text-slate-700 dark:text-slate-300; }
+    .body { @apply leading-relaxed text-slate-700 dark:text-slate-300; }
+  }
+</style>
+</head>
+
+<body class="bg-white text-slate-800 antialiased dark:bg-ink-950 dark:text-slate-200 font-sans">
+
+<a href="#main" data-i18n="a11y.skip" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-3 focus:rounded-lg focus:bg-pool-600 focus:px-4 focus:py-2 focus:text-white">Skip to content</a>
+
+<!-- ─────────────────────────────── nav ─────────────────────────────── -->
+<header class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur dark:border-white/10 dark:bg-ink-950/85">
+  <div class="wrap flex h-16 items-center justify-between gap-3">
+    <a href="#top" class="flex items-center gap-2.5 font-bold tracking-tight text-ink-900 dark:text-white">
+      <svg viewBox="0 0 32 32" class="h-7 w-7 shrink-0" aria-hidden="true" fill="none">
+        <rect x="3" y="20" width="26" height="5" rx="2.5" class="fill-pool-500"/>
+        <rect x="6" y="7" width="20" height="6" rx="3" class="fill-rig-500"/>
+        <path d="M8 20V13M24 20V13" class="stroke-rig-500" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+      <span class="hidden xs:inline sm:inline">Fist-Grip Paddle</span>
+    </a>
+
+    <nav class="hidden items-center gap-6 text-sm font-medium text-slate-600 lg:flex dark:text-slate-400">
+      <a href="#problem" data-i18n="nav.problem" class="hover:text-pool-600 dark:hover:text-pool-300">The problem</a>
+      <a href="#how" data-i18n="nav.how" class="hover:text-pool-600 dark:hover:text-pool-300">How it works</a>
+      <a href="#water" data-i18n="nav.water" class="hover:text-pool-600 dark:hover:text-pool-300">In the water</a>
+      <a href="#print" data-i18n="nav.print" class="hover:text-pool-600 dark:hover:text-pool-300">Print</a>
+      <a href="#fit" data-i18n="nav.fit" class="hover:text-pool-600 dark:hover:text-pool-300">Fit</a>
+    </nav>
+
+    <div class="flex items-center gap-2.5">
+      <!-- language toggle -->
+      <div class="flex items-center rounded-lg border border-slate-300 p-0.5 dark:border-white/20" role="group" aria-label="Language / Idioma">
+        <button type="button" data-lang="en" lang="en" class="rounded-md px-2.5 py-1 text-xs font-bold tracking-wide transition">EN</button>
+        <button type="button" data-lang="pt" lang="pt-BR" class="rounded-md px-2.5 py-1 text-xs font-bold tracking-wide transition">PT</button>
+      </div>
+      <a href="https://github.com/Agezao/fist-grip-paddle" class="inline-flex items-center gap-2 rounded-lg bg-ink-900 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-ink-700 dark:bg-white dark:text-ink-950 dark:hover:bg-slate-200">
+        <svg viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <span class="hidden sm:inline" data-i18n="nav.source">Source</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<div id="top"></div>
+
+<!-- ─────────────────────────────── hero ─────────────────────────────── -->
+<section class="relative overflow-hidden bg-gradient-to-b from-pool-50 via-white to-white dark:from-ink-900 dark:via-ink-950 dark:to-ink-950">
+  <div class="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-pool-200/40 blur-3xl dark:bg-pool-800/20"></div>
+  <div class="wrap relative grid items-center gap-12 py-16 sm:py-24 lg:grid-cols-[1.05fr_.95fr] [&>*]:min-w-0">
+    <div>
+      <p class="eyebrow" data-i18n="hero.eyebrow">Open-source adaptive equipment</p>
+      <h1 class="mt-4 text-4xl font-extrabold leading-[1.08] tracking-tight text-ink-900 sm:text-5xl lg:text-6xl dark:text-white" data-i18n="hero.title">
+        A swim paddle a <span class="text-rig-500">closed fist</span> can use.
+      </h1>
+      <p class="lede mt-6 prose-narrow" data-i18n="hero.lede">
+        Designed for swimmers with hemiplegia. Spasticity holds the affected hand closed, and a closed
+        fist presents almost no surface to the water. This paddle is laid onto a bar inside the fist
+        rather than gripped — giving back roughly the pushing area of an open hand, without the hand
+        needing to open or to grip.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="#print" data-i18n="hero.cta1" class="rounded-xl bg-pool-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-pool-700">Print one</a>
+        <a href="#how" data-i18n="hero.cta2" class="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-pool-500 hover:text-pool-700 dark:border-white/20 dark:text-slate-200 dark:hover:border-pool-400 dark:hover:text-pool-300">How it works</a>
+      </div>
+      <dl class="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-slate-200 pt-6 dark:border-white/10">
+        <div><dt class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400" data-i18n="hero.k1">Status</dt><dd class="mt-1 font-semibold text-ink-900 dark:text-white" data-i18n="hero.v1">Field tested</dd></div>
+        <div><dt class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400" data-i18n="hero.k2">Parts</dt><dd class="mt-1 font-semibold text-ink-900 dark:text-white" data-i18n="hero.v2">2 printed</dd></div>
+        <div><dt class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400" data-i18n="hero.k3">Grip needed</dt><dd class="mt-1 font-semibold text-ink-900 dark:text-white" data-i18n="hero.v3">None</dd></div>
+      </dl>
+    </div>
+    <figure class="relative">
+      <img src="img/assembled_fist_paddle.jpg" width="3024" height="4032" loading="eager" decoding="async"
+           data-i18n-alt="hero.alt"
+           alt="The assembled paddle in orange PETG resting on a table: a rounded bar spanning two triangular struts, bolted down onto a perforated plate."
+           class="w-full rounded-2xl object-cover shadow-2xl ring-1 ring-black/5 sm:max-h-[520px] dark:ring-white/10">
+      <figcaption class="mt-3 text-sm text-slate-500 dark:text-slate-400" data-i18n="hero.caption">
+        The assembled unit: grip module bolted to a 120&nbsp;mm plate with four M5 stainless countersunk bolts.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── safety ─────────────────────────────── -->
+<section id="safety" class="wrap py-12 sm:py-16">
+  <div class="rounded-2xl border-2 border-amber-400/70 bg-amber-50 p-6 sm:p-8 dark:border-amber-500/40 dark:bg-amber-950/30">
+    <div class="flex items-start gap-4">
+      <svg viewBox="0 0 24 24" class="mt-0.5 h-7 w-7 shrink-0 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>
+      </svg>
+      <div>
+        <h2 class="text-xl font-bold text-amber-900 dark:text-amber-200" data-i18n="safety.h">Safety first — read this part</h2>
+        <p class="mt-2 text-amber-900/90 dark:text-amber-100/85" data-i18n="safety.sub">This is an unregulated, home-made device used in water.</p>
+        <ul class="mt-5 grid gap-3 text-[0.95rem] text-amber-950/90 sm:grid-cols-2 dark:text-amber-100/80">
+          <li class="flex gap-2.5"><span aria-hidden="true" class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500"></span><span data-i18n="safety.1"><strong class="font-semibold">Involve a physiotherapist or OT.</strong> Not as a formality — they position the arm to measure the wrist angle the design depends on, and judge whether adding drag to the affected arm is safe. Shoulder subluxation is common on the hemiplegic side.</span></li>
+          <li class="flex gap-2.5"><span aria-hidden="true" class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500"></span><span data-i18n="safety.2"><strong class="font-semibold">Check the skin after every one of the first several sessions</strong>, where the palm sits on the bar's flat and where the fingertips press the plate. Reduced sensation is normal on the affected side, so a pressure mark can develop without being felt.</span></li>
+          <li class="flex gap-2.5"><span aria-hidden="true" class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500"></span><span data-i18n="safety.3"><strong class="font-semibold">Never use a closed loop the hand cannot be pulled out of.</strong> If you fit a wrist tether, use elastic shock cord so it stretches off under load. Webbing that cinches is the wrong choice here.</span></li>
+          <li class="flex gap-2.5"><span aria-hidden="true" class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500"></span><span data-i18n="safety.4"><strong class="font-semibold">Supervised water only</strong>, at least until the swimmer and whoever helps them are confident with donning and removing it quickly.</span></li>
+          <li class="flex gap-2.5"><span aria-hidden="true" class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500"></span><span data-i18n="safety.5">This is <strong class="font-semibold">not a flotation aid</strong> and does nothing to keep anyone afloat.</span></li>
+          <li class="flex gap-2.5"><span aria-hidden="true" class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500"></span><span data-i18n="safety.6"><strong class="font-semibold">Start with short sets.</strong> Paddles are a well-known route into shoulder trouble even for unimpaired swimmers.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── problem ─────────────────────────────── -->
+<section id="problem" class="border-t border-slate-200 bg-slate-50 py-16 sm:py-24 dark:border-white/10 dark:bg-ink-900">
+  <div class="wrap grid items-center gap-12 lg:grid-cols-2 [&>*]:min-w-0">
+    <figure>
+      <img src="img/regular_paddle.jpeg" width="1118" height="1014" loading="lazy" decoding="async"
+           data-i18n-alt="problem.alt"
+           alt="A pair of blue moulded swim paddles, one worn on an open hand with elastic tubing looped over the fingers and around the wrist."
+           class="w-full rounded-2xl bg-white object-contain shadow-lg ring-1 ring-black/5 dark:ring-white/10">
+      <figcaption class="mt-3 text-sm text-slate-500 dark:text-slate-400" data-i18n="problem.caption">
+        A conventional hand paddle. Every part of it — the flat face, the finger loop, the wrist strap — assumes a hand that opens.
+      </figcaption>
+    </figure>
+    <div>
+      <p class="eyebrow" data-i18n="problem.eyebrow">The problem</p>
+      <h2 class="h2 mt-3" data-i18n="problem.h">An ordinary paddle is not an option</h2>
+      <div class="mt-6 space-y-4 body prose-narrow">
+        <p data-i18n="problem.p1">
+          After a stroke or brain injury, spasticity commonly holds the hand on the affected side closed.
+          A closed fist presents almost no surface to the water — so little that
+          <em>fist gloves</em> are sold to able-bodied swimmers as a drill to deliberately <em>remove</em> feel for the water.
+        </p>
+        <p data-i18n="problem.p2">
+          A conventional hand paddle assumes an open palm and a working grip. It needs the fingers to
+          thread through elastic, the palm to lie flat against the plate, and the hand to hold position
+          against the load. None of that is available.
+        </p>
+        <p class="rounded-xl border-l-4 border-pool-500 bg-white px-5 py-4 font-medium text-ink-900 shadow-sm dark:bg-ink-800 dark:text-white" data-i18n="problem.p3">
+          So the affected arm swims with roughly a wrist's worth of surface area while the unaffected
+          arm swims with a whole hand. This paddle exists to close that gap.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── how it works ─────────────────────────────── -->
+<section id="how" class="py-16 sm:py-24">
+  <div class="wrap">
+    <div class="max-w-3xl">
+      <p class="eyebrow" data-i18n="how.eyebrow">How it works</p>
+      <h2 class="h2 mt-3" data-i18n="how.h">Follow the load, and the design falls out</h2>
+      <p class="lede mt-5" data-i18n="how.lede">
+        The non-obvious part is which side of the fist the plate goes on. It is not a styling choice —
+        it is the whole idea.
+      </p>
+    </div>
+
+    <div class="mt-12 grid items-center gap-12 lg:grid-cols-2 [&>*]:min-w-0">
+      <figure class="order-2 lg:order-1">
+        <img src="img/3d_view.png" width="1100" height="800" loading="lazy" decoding="async"
+             data-i18n-alt="how.alt"
+             alt="Rendered view of the assembly: an oval bar carried on two struts above a round perforated plate, with countersunk bolt holes."
+             class="w-full rounded-2xl bg-slate-100 object-contain shadow-lg ring-1 ring-black/5 dark:bg-ink-800 dark:ring-white/10">
+        <figcaption class="mt-3 text-sm text-slate-500 dark:text-slate-400" data-i18n="how.caption">
+          Two printed parts. The fist lies on the bar; the plate does the pushing.
+        </figcaption>
+      </figure>
+
+      <ol class="order-1 space-y-6 lg:order-2">
+        <li class="flex gap-4">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pool-600 text-sm font-bold text-white">1</span>
+          <div>
+            <h3 class="font-semibold text-ink-900 dark:text-white" data-i18n="how.s1h">The plate sits on the palm side, past the fingertips</h3>
+            <p class="body mt-1.5 text-[0.95rem]" data-i18n="how.s1p">During the pull, water pushes the plate <em>toward</em> the hand.</p>
+          </div>
+        </li>
+        <li class="flex gap-4">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pool-600 text-sm font-bold text-white">2</span>
+          <div>
+            <h3 class="font-semibold text-ink-900 dark:text-white" data-i18n="how.s2h">That force runs up the struts into the bar</h3>
+            <p class="body mt-1.5 text-[0.95rem]" data-i18n="how.s2p">And the bar presses into the palm. The arm resists it directly, through the fist rather than the fingers.</p>
+          </div>
+        </li>
+        <li class="flex gap-4">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pool-600 text-sm font-bold text-white">3</span>
+          <div>
+            <h3 class="font-semibold text-ink-900 dark:text-white" data-i18n="how.s3h">No grip strength is used for propulsion</h3>
+            <p class="body mt-1.5 text-[0.95rem]" data-i18n="how.s3p">The fingers only matter during the recovery, when the arm is out of the water and forces are small — and flexor tone tends to close the fingers around the bar on its own, which for once works in our favour.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="mt-12 grid gap-5 sm:grid-cols-3">
+      <div class="rounded-2xl border border-rig-500/30 bg-rig-500/5 p-6">
+        <h3 class="font-semibold text-ink-900 dark:text-white" data-i18n="how.c1h">Why not the other way round?</h3>
+        <p class="body mt-2 text-[0.95rem]" data-i18n="how.c1p">Put the plate on the back-of-hand side and every newton of propulsion tries to rip the paddle out of the hand, with grip strength the only thing holding it on. That version works for nobody, and least of all here.</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-ink-900">
+        <h3 class="font-semibold text-ink-900 dark:text-white" data-i18n="how.c2h">It balances itself</h3>
+        <p class="body mt-2 text-[0.95rem]" data-i18n="how.c2p">Trimming the wrist edge pulls the plate's area centroid toward the fingertips. If that centroid misses the bar axis, water spends the whole stroke twisting the paddle — unmanageable without grip. The source solves for the offset that lines them up, and re-solves whenever you change a dimension.</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-ink-900">
+        <h3 class="font-semibold text-ink-900 dark:text-white" data-i18n="how.c3h">Symmetric by design</h3>
+        <p class="body mt-2 text-[0.95rem]" data-i18n="how.c3p">There is no left or right version. The same files serve either hand, so nobody has to fork the design to mirror it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── in the water ─────────────────────────────── -->
+<section id="water" class="border-y border-slate-200 bg-ink-950 py-16 text-slate-200 sm:py-24 dark:border-white/10">
+  <div class="wrap grid items-center gap-12 lg:grid-cols-[.9fr_1.1fr] [&>*]:min-w-0">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-pool-300" data-i18n="water.eyebrow">In the water</p>
+      <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-white sm:text-4xl" data-i18n="water.h">It has been swum, not just rendered</h2>
+      <div class="mt-6 space-y-4 leading-relaxed text-slate-300 prose-narrow">
+        <p data-i18n="water.p1">
+          The swimmer it was designed for has used a printed unit successfully. The geometry in the
+          repository is the geometry that worked, not a proposal.
+        </p>
+        <p data-i18n="water.p2">
+          That said: it has been tested by very few people, in one pool, on one hand. Treat the
+          numbers below as a starting point for fitting, not as a specification.
+        </p>
+      </div>
+      <div class="mt-8 rounded-2xl border border-white/10 bg-white/[0.04] p-6">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-pool-300" data-i18n="water.cfg">Known-good configuration</h3>
+        <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 font-mono text-sm">
+          <div class="flex justify-between gap-3 border-b border-white/10 pb-2"><dt class="text-slate-400">clear_span</dt><dd class="font-medium text-white">100</dd></div>
+          <div class="flex justify-between gap-3 border-b border-white/10 pb-2"><dt class="text-slate-400">grip_z</dt><dd class="font-medium text-white">32</dd></div>
+          <div class="flex justify-between gap-3 border-b border-white/10 pb-2"><dt class="text-slate-400">grip_y</dt><dd class="font-medium text-white">26</dd></div>
+          <div class="flex justify-between gap-3 border-b border-white/10 pb-2"><dt class="text-slate-400">palm_flat</dt><dd class="font-medium text-white">20</dd></div>
+          <div class="flex justify-between gap-3 border-b border-white/10 pb-2"><dt class="text-slate-400">standoff</dt><dd class="font-medium text-white">45</dd></div>
+          <div class="flex justify-between gap-3 border-b border-white/10 pb-2"><dt class="text-slate-400">plate_dia</dt><dd class="font-medium text-white">120</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <figure>
+      <div class="overflow-hidden rounded-2xl bg-black shadow-2xl ring-1 ring-white/10">
+        <video controls playsinline preload="none" poster="img/test-run-poster.jpg"
+               class="mx-auto block max-h-[70vh] w-full object-contain">
+          <source src="img/test-run-web.mp4" type="video/mp4">
+          <span data-i18n="water.novideo">Your browser cannot play this video.</span>
+          <a href="img/test-run-web.mp4" class="underline" data-i18n="water.download">Download the clip instead.</a>
+        </video>
+      </div>
+      <figcaption class="mt-3 text-sm text-slate-400" data-i18n="water.caption">
+        Underwater footage from a pool session: the closed fist resting on the bar, plate forward of the
+        fingertips, mid-pull. Shared with the swimmer's consent.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── print ─────────────────────────────── -->
+<section id="print" class="py-16 sm:py-24">
+  <div class="wrap">
+    <div class="max-w-3xl">
+      <p class="eyebrow" data-i18n="print.eyebrow">What you print</p>
+      <h2 class="h2 mt-3" data-i18n="print.h">Two parts, four bolts, an afternoon</h2>
+      <p class="lede mt-5" data-i18n="print.lede">
+        The grip module is fitted once to the hand. Plates bolt on and swap, so you can start small
+        and add area only when the stroke and the shoulder can take it.
+      </p>
+    </div>
+
+    <div class="mt-12 grid gap-10 lg:grid-cols-[1.4fr_.6fr] [&>*]:min-w-0">
+      <div>
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-white/10">
+          <table class="w-full min-w-[34rem] text-left text-sm">
+            <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-600 dark:bg-ink-900 dark:text-slate-400">
+              <tr>
+                <th scope="col" class="px-4 py-3 font-semibold" data-i18n="print.th1">Part</th>
+                <th scope="col" class="px-4 py-3 font-semibold" data-i18n="print.th2">File</th>
+                <th scope="col" class="px-4 py-3 font-semibold" data-i18n="print.th3">Time</th>
+                <th scope="col" class="px-4 py-3 font-semibold" data-i18n="print.th4">Notes</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+              <tr>
+                <th scope="row" class="whitespace-nowrap px-4 py-4 font-semibold text-ink-900 dark:text-white" data-i18n="print.r1n">Fit gauge</th>
+                <td class="px-4 py-4 font-mono text-xs text-slate-600 dark:text-slate-400">part="gripcheck"</td>
+                <td class="whitespace-nowrap px-4 py-4 tabular-nums">~1 h</td>
+                <td class="px-4 py-4 text-slate-600 dark:text-slate-400" data-i18n="print.r1d">A 44 mm slice of the grip. <strong class="font-semibold text-ink-900 dark:text-white">Build this first.</strong></td>
+              </tr>
+              <tr>
+                <th scope="row" class="whitespace-nowrap px-4 py-4 font-semibold text-ink-900 dark:text-white" data-i18n="print.r2n">Grip module</th>
+                <td class="px-4 py-4"><a class="font-mono text-xs text-pool-700 underline underline-offset-2 hover:text-pool-500 dark:text-pool-300" href="grip_module.stl">grip_module.stl</a></td>
+                <td class="whitespace-nowrap px-4 py-4 tabular-nums">~3 h</td>
+                <td class="px-4 py-4 text-slate-600 dark:text-slate-400" data-i18n="print.r2d">≈ 74 g. Supports under the bar only.</td>
+              </tr>
+              <tr>
+                <th scope="row" class="whitespace-nowrap px-4 py-4 font-semibold text-ink-900 dark:text-white" data-i18n="print.r3n">Plate</th>
+                <td class="whitespace-nowrap px-4 py-4 font-mono text-xs">
+                  <a class="text-pool-700 underline underline-offset-2 hover:text-pool-500 dark:text-pool-300" href="plate_120mm.stl">120</a><span class="text-slate-400">&nbsp;/&nbsp;</span><a class="text-pool-700 underline underline-offset-2 hover:text-pool-500 dark:text-pool-300" href="plate_135mm.stl">135</a><span class="text-slate-400">&nbsp;/&nbsp;</span><a class="text-pool-700 underline underline-offset-2 hover:text-pool-500 dark:text-pool-300" href="plate_150mm.stl">150</a><span class="text-slate-500">&nbsp;mm</span>
+                </td>
+                <td class="whitespace-nowrap px-4 py-4 tabular-nums">~1.5 h</td>
+                <td class="px-4 py-4 text-slate-600 dark:text-slate-400" data-i18n="print.r3d">22–41 g. Bolts on, swappable. Start small.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-8 grid gap-5 sm:grid-cols-2">
+          <div class="rounded-2xl border border-slate-200 p-6 dark:border-white/10">
+            <h3 class="font-semibold text-ink-900 dark:text-white" data-i18n="print.math">Material</h3>
+            <p class="body mt-2 text-[0.95rem]" data-i18n="print.matp">
+              <strong class="font-semibold text-ink-900 dark:text-white">PETG or ABS.</strong>
+              Not PLA — it softens in a warm pool and creeps under sustained load.
+              Four perimeters minimum; the struts carry everything. 25&nbsp;% infill is plenty.
+            </p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 p-6 dark:border-white/10">
+            <h3 class="font-semibold text-ink-900 dark:text-white" data-i18n="print.hwh">Hardware</h3>
+            <p class="body mt-2 text-[0.95rem]" data-i18n="print.hwp">
+              4 × <strong class="font-semibold text-ink-900 dark:text-white">M5 × 16 A4 stainless countersunk</strong> bolts and M5 A4 nyloc nuts.
+              Heads sit flush on the water face; nuts drop into hex pockets, so it assembles with a
+              screwdriver alone. File flush any thread poking above a nut.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <figure>
+        <img src="img/printed_fist_paddle.jpg" width="1496" height="1496" loading="lazy" decoding="async"
+             data-i18n-alt="print.alt"
+             alt="The two freshly printed orange parts side by side: the grip module standing on its mounting flanges, and a round perforated plate with one edge cut flat."
+             class="w-full rounded-2xl object-cover shadow-lg ring-1 ring-black/5 dark:ring-white/10">
+        <figcaption class="mt-3 text-sm text-slate-500 dark:text-slate-400" data-i18n="print.caption">
+          Straight off the printer. The flat edge on the plate is the wrist side — it clears the forearm at the catch.
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── fitting ─────────────────────────────── -->
+<section id="fit" class="border-t border-slate-200 bg-slate-50 py-16 sm:py-24 dark:border-white/10 dark:bg-ink-900">
+  <div class="wrap">
+    <div class="max-w-3xl">
+      <p class="eyebrow" data-i18n="fit.eyebrow">Fitting</p>
+      <h2 class="h2 mt-3" data-i18n="fit.h">The workflow that actually matters</h2>
+      <p class="lede mt-5" data-i18n="fit.lede">
+        The STLs in the repository are one person's fit. The point of the project is the parametric
+        source, so you can make it someone else's.
+      </p>
+    </div>
+
+    <ol class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <li class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-ink-800">
+        <span class="eyebrow" data-i18n="fit.l1">Step 1</span>
+        <h3 class="mt-2 font-semibold text-ink-900 dark:text-white" data-i18n="fit.s1h">Build the fit gauge</h3>
+        <p class="body mt-2 text-[0.95rem]" data-i18n="fit.s1p">Real bar, real span, real palm flat, real standoff — at a fraction of the print time.</p>
+      </li>
+      <li class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-ink-800">
+        <span class="eyebrow" data-i18n="fit.l2">Step 2</span>
+        <h3 class="mt-2 font-semibold text-ink-900 dark:text-white" data-i18n="fit.s2h">Try it on a table</h3>
+        <p class="body mt-2 text-[0.95rem]" data-i18n="fit.s2p">Check three things: the fist fits the span with the thumb where it naturally falls; the palm settles onto the flat rather than rolling off it; the fingertips clear the plate with a little room. Adjust, reprint, repeat — the loop costs an hour.</p>
+      </li>
+      <li class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-ink-800">
+        <span class="eyebrow" data-i18n="fit.l3">Step 3</span>
+        <h3 class="mt-2 font-semibold text-ink-900 dark:text-white" data-i18n="fit.s3h">Find the wrist angle</h3>
+        <p class="body mt-2 text-[0.95rem]" data-i18n="fit.s3p">The one parameter you cannot judge from a table top. Have the therapist hold the arm in the catch position with the gauge on, and look at where the plate faces — it should be roughly square to the pull. A spastic wrist usually sits flexed and pronated, so the answer is rarely zero.</p>
+      </li>
+      <li class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-ink-800">
+        <span class="eyebrow" data-i18n="fit.l4">Step 4</span>
+        <h3 class="mt-2 font-semibold text-ink-900 dark:text-white" data-i18n="fit.s4h">Print the grip module</h3>
+        <p class="body mt-2 text-[0.95rem]" data-i18n="fit.s4p">With <code class="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[0.85em] dark:bg-white/10">grip_angle</code> set, plus one plate. Start with the smallest.</p>
+      </li>
+      <li class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-ink-800">
+        <span class="eyebrow" data-i18n="fit.l5">Step 5</span>
+        <h3 class="mt-2 font-semibold text-ink-900 dark:text-white" data-i18n="fit.s5h">Swim, then size up</h3>
+        <p class="body mt-2 text-[0.95rem]" data-i18n="fit.s5p">Increase plate area only if the stroke rate holds and the shoulder stays quiet.</p>
+      </li>
+      <li class="rounded-2xl border-2 border-dashed border-pool-400/60 bg-pool-50 p-6 dark:border-pool-500/40 dark:bg-pool-900/20">
+        <span class="eyebrow" data-i18n="fit.l6">Comfort</span>
+        <h3 class="mt-2 font-semibold text-ink-900 dark:text-white" data-i18n="fit.s6h">Sleeve the bar</h3>
+        <p class="body mt-2 text-[0.95rem]" data-i18n="fit.s6p">Silicone tube or adhesive neoprene spreads pressure over skin that may not report a problem, and stops layer lines abrading. If you do, subtract twice the sleeve thickness from <code class="rounded bg-white/70 px-1.5 py-0.5 font-mono text-[0.85em] dark:bg-white/10">grip_z</code> and <code class="rounded bg-white/70 px-1.5 py-0.5 font-mono text-[0.85em] dark:bg-white/10">grip_y</code> before printing.</p>
+      </li>
+    </ol>
+
+    <!-- parameters -->
+    <div id="parameters" class="mt-16">
+      <h3 class="text-xl font-bold text-ink-900 dark:text-white" data-i18n="par.h">The parameters that decide fit</h3>
+      <div class="mt-5 overflow-x-auto rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-ink-800">
+        <table class="w-full min-w-[40rem] text-left text-sm">
+          <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-600 dark:bg-ink-900 dark:text-slate-400">
+            <tr>
+              <th scope="col" class="px-5 py-3 font-semibold" data-i18n="par.th1">Parameter</th>
+              <th scope="col" class="px-5 py-3 font-semibold" data-i18n="par.th2">What it is</th>
+              <th scope="col" class="px-5 py-3 font-semibold" data-i18n="par.th3">How to find your number</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+            <tr><th scope="row" class="whitespace-nowrap px-5 py-4 font-mono text-xs font-medium text-rig-600 dark:text-rig-400">clear_span</th><td class="px-5 py-4" data-i18n="par.a1">Clear width between the struts</td><td class="px-5 py-4 text-slate-600 dark:text-slate-400" data-i18n="par.b1">Widest point across the closed fist, thumb included where it lies, plus 8–10 mm</td></tr>
+            <tr><th scope="row" class="whitespace-nowrap px-5 py-4 font-mono text-xs font-medium text-rig-600 dark:text-rig-400">grip_z / grip_y</th><td class="px-5 py-4" data-i18n="par.a2">Bar oval, toward the plate / fore-aft</td><td class="px-5 py-4 text-slate-600 dark:text-slate-400" data-i18n="par.b2">The natural aperture inside the resting fist. Too large and the hand will not go on</td></tr>
+            <tr><th scope="row" class="whitespace-nowrap px-5 py-4 font-mono text-xs font-medium text-rig-600 dark:text-rig-400">palm_flat</th><td class="px-5 py-4" data-i18n="par.a3">Width of the flat the palm seats on</td><td class="px-5 py-4 text-slate-600 dark:text-slate-400" data-i18n="par.b3">20 mm suits most hands. Larger keys the angle harder; 0 removes it</td></tr>
+            <tr><th scope="row" class="whitespace-nowrap px-5 py-4 font-mono text-xs font-medium text-rig-600 dark:text-rig-400">standoff</th><td class="px-5 py-4" data-i18n="par.a4">Plate face to bar axis</td><td class="px-5 py-4 text-slate-600 dark:text-slate-400" data-i18n="par.b4">Bar axis to the outermost point of the curled fingers, plus 8–12 mm</td></tr>
+            <tr><th scope="row" class="whitespace-nowrap px-5 py-4 font-mono text-xs font-medium text-rig-600 dark:text-rig-400">grip_angle</th><td class="px-5 py-4" data-i18n="par.a5">Hand tilt relative to the plate</td><td class="px-5 py-4 text-slate-600 dark:text-slate-400" data-i18n="par.b5">Measured on the swimmer in the catch position. Positive raises the wrist end</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-4 text-sm text-slate-500 dark:text-slate-400" data-i18n="par.note">
+        Full reference, print settings and a troubleshooting table are in the
+        <a href="https://github.com/Agezao/fist-grip-paddle#readme" class="font-medium text-pool-700 underline underline-offset-2 hover:text-pool-500 dark:text-pool-300">README</a>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── build ─────────────────────────────── -->
+<section id="build" class="py-16 sm:py-24">
+  <div class="wrap grid gap-12 lg:grid-cols-2 [&>*]:min-w-0">
+    <div>
+      <p class="eyebrow" data-i18n="build.eyebrow">Build it yourself</p>
+      <h2 class="h2 mt-3" data-i18n="build.h">Everything is parametric</h2>
+      <p class="lede mt-5 prose-narrow" data-i18n="build.p">
+        Open <code class="rounded bg-slate-100 px-1.5 py-1 font-mono text-[0.85em] dark:bg-white/10">fist_paddle.scad</code>
+        in OpenSCAD. Everything above the <span class="font-mono text-[0.9em]">[Hidden]</span> marker is meant to be edited.
+        F5 to preview, F6 for the real render, then export — always F6 before exporting, or you can get a broken mesh.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="fist_paddle.scad" data-i18n="build.cta1" class="rounded-xl bg-pool-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-pool-700">Download the source</a>
+        <a href="https://openscad.org/downloads.html" data-i18n="build.cta2" class="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-pool-500 hover:text-pool-700 dark:border-white/20 dark:text-slate-200 dark:hover:border-pool-400 dark:hover:text-pool-300">Get OpenSCAD</a>
+      </div>
+    </div>
+    <div class="overflow-hidden rounded-2xl bg-ink-950 ring-1 ring-white/10">
+      <div class="flex items-center gap-2 border-b border-white/10 px-4 py-3">
+        <span class="h-2.5 w-2.5 rounded-full bg-red-400/70"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-amber-400/70"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-green-400/70"></span>
+        <span class="ml-2 font-mono text-xs text-slate-400" data-i18n="build.term">command line</span>
+      </div>
+      <pre class="overflow-x-auto px-5 py-5 font-mono text-[0.8rem] leading-relaxed text-slate-300"><code data-i18n="build.code"><span class="text-slate-500"># the fitted part</span>
+openscad -o grip_module.stl \
+  -D <span class="text-pool-300">'part="grip"'</span> fist_paddle.scad
+
+<span class="text-slate-500"># a pushing surface, any diameter</span>
+openscad -o plate_135mm.stl \
+  -D <span class="text-pool-300">'part="plate"'</span> \
+  -D <span class="text-pool-300">'plate_dia=135'</span> fist_paddle.scad
+
+<span class="text-slate-500"># the fit gauge — build this first</span>
+openscad -o grip_fit_gauge.stl \
+  -D <span class="text-pool-300">'part="gripcheck"'</span> fist_paddle.scad</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── contribute ─────────────────────────────── -->
+<section id="contribute" class="border-t border-slate-200 bg-gradient-to-b from-white to-pool-50 py-16 sm:py-24 dark:border-white/10 dark:from-ink-950 dark:to-ink-900">
+  <div class="wrap grid gap-10 lg:grid-cols-2 [&>*]:min-w-0">
+    <div>
+      <p class="eyebrow" data-i18n="con.eyebrow">Contributing</p>
+      <h2 class="h2 mt-3" data-i18n="con.h">What this design lacks is data</h2>
+      <div class="mt-6 space-y-4 body prose-narrow">
+        <p data-i18n="con.p1">
+          The most useful contribution is a <strong class="font-semibold text-ink-900 dark:text-white">fitting report</strong>:
+          hand dimensions, the parameter values that worked, and what you had to change.
+          Photographs of the device in use, with consent, help more than renders.
+        </p>
+        <p data-i18n="con.p2">
+          If you are a clinician and something here is wrong, please open an issue.
+        </p>
+      </div>
+      <a href="https://github.com/Agezao/fist-grip-paddle/issues" data-i18n="con.cta" class="mt-8 inline-flex rounded-xl bg-ink-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-ink-700 dark:bg-white dark:text-ink-950 dark:hover:bg-slate-200">Open an issue</a>
+    </div>
+    <div class="rounded-2xl border border-slate-300 bg-white/70 p-7 dark:border-white/10 dark:bg-white/[0.03]">
+      <h3 class="font-bold text-ink-900 dark:text-white" data-i18n="con.lh">An honest limitation</h3>
+      <p class="body mt-3" data-i18n="con.lp">
+        This is an unregulated device that goes on a disabled person's arm in water. It was engineered
+        from first principles, not from clinical practice, and it has been tested by very few people.
+        It works for the swimmer it was built for. Whether it works for anyone else is genuinely an
+        open question — which is why the source, and not the STLs, is the deliverable.
+      </p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ─────────────────────────────── footer ─────────────────────────────── -->
+<footer class="border-t border-slate-200 bg-white py-12 dark:border-white/10 dark:bg-ink-950">
+  <div class="wrap flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+    <div>
+      <p class="font-bold text-ink-900 dark:text-white">Fist-Grip Swim Paddle</p>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400" data-i18n="foot.tag">Open hardware for adaptive swimming.</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+      <a href="https://github.com/Agezao/fist-grip-paddle" data-i18n="foot.repo" class="font-medium text-slate-600 hover:text-pool-600 dark:text-slate-400 dark:hover:text-pool-300">Repository</a>
+      <a href="https://github.com/Agezao/fist-grip-paddle#readme" class="font-medium text-slate-600 hover:text-pool-600 dark:text-slate-400 dark:hover:text-pool-300">README</a>
+      <a href="#safety" data-i18n="foot.safety" class="font-medium text-slate-600 hover:text-pool-600 dark:text-slate-400 dark:hover:text-pool-300">Safety</a>
+      <span class="text-slate-400 dark:text-slate-500" data-i18n="foot.lic">License: TBD</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── i18n ───────────────────────────────────────────────────────────────
+   English lives inline in the markup above (so the page still reads with
+   JS off) and is harvested into EN on load. Only pt-BR is authored here. */
+(function () {
+  var PT = {
+    'meta.title': 'Palmar de Punho Fechado — equipamento adaptado e aberto para nadadores com hemiplegia',
+    'meta.desc': 'Um palmar de natação impresso em 3D, apoiado sobre uma barra dentro da mão fechada. Feito para nadadores com hemiplegia, em que a espasticidade mantém a mão fechada e um palmar comum pressupõe palma aberta e força de preensão. Código paramétrico em OpenSCAD, testado na água.',
+
+    'a11y.skip': 'Pular para o conteúdo',
+    'nav.problem': 'O problema', 'nav.how': 'Como funciona', 'nav.water': 'Na água',
+    'nav.print': 'Imprimir', 'nav.fit': 'Ajuste', 'nav.source': 'Código',
+
+    'hero.eyebrow': 'Equipamento adaptado de código aberto',
+    'hero.title': 'Um palmar que a <span class="text-rig-500">mão fechada</span> consegue usar.',
+    'hero.lede': 'Feito para nadadores com hemiplegia. A espasticidade mantém a mão afetada fechada, e uma mão fechada oferece quase nenhuma superfície à água. Este palmar é apoiado sobre uma barra dentro da mão, em vez de segurado — devolvendo aproximadamente a área de propulsão de uma mão aberta, sem que a mão precise abrir nem agarrar.',
+    'hero.cta1': 'Imprima o seu', 'hero.cta2': 'Como funciona',
+    'hero.k1': 'Situação', 'hero.v1': 'Testado na água',
+    'hero.k2': 'Peças', 'hero.v2': '2 impressas',
+    'hero.k3': 'Preensão exigida', 'hero.v3': 'Nenhuma',
+    'hero.alt': 'O palmar montado em PETG laranja sobre uma mesa: uma barra arredondada entre dois montantes triangulares, parafusada sobre uma placa perfurada.',
+    'hero.caption': 'O conjunto montado: módulo de pegada parafusado a uma placa de 120&nbsp;mm com quatro parafusos M5 escareados em inox.',
+
+    'safety.h': 'Segurança primeiro — leia esta parte',
+    'safety.sub': 'Este é um dispositivo caseiro, não regulamentado, usado dentro d’água.',
+    'safety.1': '<strong class="font-semibold">Envolva um fisioterapeuta ou terapeuta ocupacional.</strong> Não como formalidade — é quem posiciona o braço para medir o ângulo de punho de que o projeto depende, e quem avalia se acrescentar arrasto ao braço afetado é seguro. Subluxação do ombro é comum no lado hemiplégico.',
+    'safety.2': '<strong class="font-semibold">Confira a pele depois de cada uma das primeiras sessões</strong>, onde a palma se apoia no plano da barra e onde as pontas dos dedos pressionam a placa. Sensibilidade reduzida é comum no lado afetado, então uma marca de pressão pode se formar sem ser sentida.',
+    'safety.3': '<strong class="font-semibold">Nunca use uma alça fechada da qual a mão não possa ser puxada para fora.</strong> Se usar um cordão de punho, use cordão elástico, que se solta sob carga. Fita que aperta é a escolha errada aqui.',
+    'safety.4': '<strong class="font-semibold">Somente em água supervisionada</strong>, ao menos até que o nadador e quem o acompanha tenham segurança para colocar e retirar o equipamento rapidamente.',
+    'safety.5': 'Isto <strong class="font-semibold">não é um equipamento de flutuação</strong> e não ajuda ninguém a boiar.',
+    'safety.6': '<strong class="font-semibold">Comece com séries curtas.</strong> Palmares são uma via conhecida para problemas de ombro mesmo em nadadores sem deficiência.',
+
+    'problem.eyebrow': 'O problema',
+    'problem.h': 'Um palmar comum não é uma opção',
+    'problem.p1': 'Depois de um AVC ou lesão cerebral, a espasticidade costuma manter fechada a mão do lado afetado. Uma mão fechada oferece quase nenhuma superfície à água — tão pouca que <em>luvas de punho fechado</em> são vendidas a nadadores sem deficiência como exercício para <em>remover</em> propositalmente a sensibilidade à água.',
+    'problem.p2': 'Um palmar convencional pressupõe palma aberta e preensão funcional. Exige que os dedos passem pelo elástico, que a palma se apoie plana contra a placa e que a mão mantenha a posição contra a carga. Nada disso está disponível.',
+    'problem.p3': 'Assim, o braço afetado nada com aproximadamente a área de um punho enquanto o braço não afetado nada com uma mão inteira. Este palmar existe para fechar essa diferença.',
+    'problem.alt': 'Um par de palmares azuis moldados, um deles usado em uma mão aberta, com tubos elásticos passando pelos dedos e ao redor do punho.',
+    'problem.caption': 'Um palmar de mão convencional. Cada parte dele — a face plana, a alça de dedo, a tira de punho — pressupõe uma mão que abre.',
+
+    'how.eyebrow': 'Como funciona',
+    'how.h': 'Siga a carga, e o projeto se resolve sozinho',
+    'how.lede': 'A parte não óbvia é de que lado da mão fica a placa. Não é escolha estética — é a ideia inteira.',
+    'how.s1h': 'A placa fica do lado da palma, além das pontas dos dedos',
+    'how.s1p': 'Durante a puxada, a água empurra a placa <em>na direção</em> da mão.',
+    'how.s2h': 'Essa força sobe pelos montantes até a barra',
+    'how.s2p': 'E a barra pressiona a palma. O braço resiste diretamente, através da mão fechada e não dos dedos.',
+    'how.s3h': 'Nenhuma força de preensão é usada na propulsão',
+    'how.s3p': 'Os dedos só importam na recuperação, quando o braço está fora d’água e as forças são pequenas — e o tônus flexor tende a fechar os dedos em volta da barra sozinho, o que desta vez joga a nosso favor.',
+    'how.alt': 'Vista renderizada do conjunto: uma barra oval sustentada por dois montantes acima de uma placa redonda perfurada, com furos escareados para parafusos.',
+    'how.caption': 'Duas peças impressas. A mão fechada se apoia na barra; a placa faz a propulsão.',
+    'how.c1h': 'Por que não ao contrário?',
+    'how.c1p': 'Coloque a placa do lado do dorso da mão e cada newton de propulsão passa a tentar arrancar o palmar da mão, com a força de preensão como única coisa segurando. Essa versão não funciona para ninguém, e menos ainda aqui.',
+    'how.c2h': 'Ele se equilibra sozinho',
+    'how.c2p': 'Cortar a borda do lado do punho puxa o centroide de área da placa em direção às pontas dos dedos. Se esse centroide não coincidir com o eixo da barra, a água passa a puxada inteira torcendo o palmar — algo incontrolável sem preensão. O código resolve o deslocamento que alinha os dois, e recalcula sempre que você muda uma dimensão.',
+    'how.c3h': 'Simétrico por projeto',
+    'how.c3p': 'Não existe versão esquerda ou direita. Os mesmos arquivos servem para qualquer mão, então ninguém precisa bifurcar o projeto para espelhá-lo.',
+
+    'water.eyebrow': 'Na água',
+    'water.h': 'Já foi nadado, não apenas renderizado',
+    'water.p1': 'O nadador para quem foi projetado já usou uma unidade impressa com sucesso. A geometria no repositório é a geometria que funcionou, não uma proposta.',
+    'water.p2': 'Dito isso: foi testado por pouquíssimas pessoas, em uma piscina, em uma mão. Trate os números abaixo como ponto de partida para o ajuste, não como especificação.',
+    'water.cfg': 'Configuração validada',
+    'water.novideo': 'Seu navegador não consegue reproduzir este vídeo.',
+    'water.download': 'Baixe o clipe.',
+    'water.caption': 'Imagens subaquáticas de uma sessão na piscina: a mão fechada apoiada na barra, a placa à frente das pontas dos dedos, no meio da puxada. Publicado com o consentimento do nadador.',
+
+    'print.eyebrow': 'O que você imprime',
+    'print.h': 'Duas peças, quatro parafusos, uma tarde',
+    'print.lede': 'O módulo de pegada é ajustado uma vez à mão. As placas se parafusam e se trocam, então você pode começar pequeno e aumentar a área só quando a braçada e o ombro aguentarem.',
+    'print.th1': 'Peça', 'print.th2': 'Arquivo', 'print.th3': 'Tempo', 'print.th4': 'Observações',
+    'print.r1n': 'Gabarito', 'print.r1d': 'Uma fatia de 44 mm da pegada. <strong class="font-semibold text-ink-900 dark:text-white">Construa esta primeiro.</strong>',
+    'print.r2n': 'Módulo de pegada', 'print.r2d': '≈ 74 g. Suportes apenas sob a barra.',
+    'print.r3n': 'Placa', 'print.r3d': '22–41 g. Parafusa e troca. Comece pequeno.',
+    'print.math': 'Material',
+    'print.matp': '<strong class="font-semibold text-ink-900 dark:text-white">PETG ou ABS.</strong> Não PLA — ele amolece em piscina aquecida e cede sob carga contínua. Mínimo de quatro perímetros; os montantes carregam tudo. 25&nbsp;% de preenchimento é suficiente.',
+    'print.hwh': 'Ferragem',
+    'print.hwp': '4 × parafusos <strong class="font-semibold text-ink-900 dark:text-white">M5 × 16 escareados em inox A4</strong> e porcas nyloc M5 A4. As cabeças ficam rentes à face que corta a água; as porcas encaixam em alojamentos sextavados, então monta-se só com chave de fenda. Lixe rente qualquer rosca que passe da porca.',
+    'print.alt': 'As duas peças recém-impressas em laranja, lado a lado: o módulo de pegada apoiado nas flanges de fixação, e uma placa redonda perfurada com uma borda cortada reta.',
+    'print.caption': 'Recém-saídas da impressora. A borda reta da placa é o lado do punho — ela livra o antebraço na pegada.',
+
+    'fit.eyebrow': 'Ajuste',
+    'fit.h': 'O procedimento que realmente importa',
+    'fit.lede': 'Os STLs do repositório são o ajuste de uma pessoa. O objetivo do projeto é o código paramétrico, para que você possa torná-lo o ajuste de outra.',
+    'fit.l1': 'Passo 1', 'fit.s1h': 'Construa o gabarito',
+    'fit.s1p': 'Barra real, vão real, plano de palma real, afastamento real — numa fração do tempo de impressão.',
+    'fit.l2': 'Passo 2', 'fit.s2h': 'Teste sobre a mesa',
+    'fit.s2p': 'Verifique três coisas: a mão fechada cabe no vão, com o polegar onde ele naturalmente fica; a palma se assenta no plano em vez de escorregar dele; as pontas dos dedos livram a placa com uma folga. Ajuste, reimprima, repita — o ciclo custa uma hora.',
+    'fit.l3': 'Passo 3', 'fit.s3h': 'Encontre o ângulo do punho',
+    'fit.s3p': 'O único parâmetro que você não julga sobre uma mesa. Peça ao terapeuta que segure o braço na posição de pegada com o gabarito na mão, e observe para onde a placa aponta — deve ficar aproximadamente perpendicular à direção da puxada. Um punho espástico costuma ficar fletido e pronado, então a resposta raramente é zero.',
+    'fit.l4': 'Passo 4', 'fit.s4h': 'Imprima o módulo de pegada',
+    'fit.s4p': 'Com <code class="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[0.85em] dark:bg-white/10">grip_angle</code> definido, mais uma placa. Comece pela menor.',
+    'fit.l5': 'Passo 5', 'fit.s5h': 'Nade, depois aumente',
+    'fit.s5p': 'Aumente a área da placa só se o ritmo de braçada se mantiver e o ombro seguir tranquilo.',
+    'fit.l6': 'Conforto', 'fit.s6h': 'Revista a barra',
+    'fit.s6p': 'Tubo de silicone ou neoprene adesivo distribui a pressão sobre uma pele que pode não avisar do problema, e evita que as linhas de camada machuquem. Se fizer isso, subtraia duas vezes a espessura do revestimento de <code class="rounded bg-white/70 px-1.5 py-0.5 font-mono text-[0.85em] dark:bg-white/10">grip_z</code> e <code class="rounded bg-white/70 px-1.5 py-0.5 font-mono text-[0.85em] dark:bg-white/10">grip_y</code> antes de imprimir.',
+
+    'par.h': 'Os parâmetros que definem o ajuste',
+    'par.th1': 'Parâmetro', 'par.th2': 'O que é', 'par.th3': 'Como achar o seu número',
+    'par.a1': 'Vão livre entre os montantes',
+    'par.b1': 'Maior largura da mão fechada, incluindo o polegar onde ele fica, mais 8–10 mm',
+    'par.a2': 'Oval da barra, em direção à placa / no sentido do antebraço',
+    'par.b2': 'A abertura natural dentro da mão fechada em repouso. Grande demais e a mão não entra',
+    'par.a3': 'Largura do plano onde a palma se apoia',
+    'par.b3': '20 mm serve para a maioria das mãos. Maior fixa mais o ângulo; 0 remove o plano',
+    'par.a4': 'Face da placa até o eixo da barra',
+    'par.b4': 'Do eixo da barra ao ponto mais externo dos dedos curvados, mais 8–12 mm',
+    'par.a5': 'Inclinação da mão em relação à placa',
+    'par.b5': 'Medido no nadador na posição de pegada. Positivo levanta a ponta do lado do punho',
+    'par.note': 'A referência completa, os ajustes de impressão e uma tabela de solução de problemas estão no <a href="https://github.com/Agezao/fist-grip-paddle#readme" class="font-medium text-pool-700 underline underline-offset-2 hover:text-pool-500 dark:text-pool-300">README</a>.',
+
+    'build.eyebrow': 'Construa você mesmo',
+    'build.h': 'Tudo é paramétrico',
+    'build.p': 'Abra <code class="rounded bg-slate-100 px-1.5 py-1 font-mono text-[0.85em] dark:bg-white/10">fist_paddle.scad</code> no OpenSCAD. Tudo acima do marcador <span class="font-mono text-[0.9em]">[Hidden]</span> foi feito para ser editado. F5 para pré-visualizar, F6 para renderizar de verdade, então exporte — sempre F6 antes de exportar, ou você pode gerar uma malha quebrada.',
+    'build.cta1': 'Baixar o código', 'build.cta2': 'Instalar o OpenSCAD',
+    'build.term': 'linha de comando',
+    'build.code': '<span class="text-slate-500"># a peça ajustada</span>\nopenscad -o grip_module.stl \\\n  -D <span class="text-pool-300">\'part="grip"\'</span> fist_paddle.scad\n\n<span class="text-slate-500"># uma superfície de propulsão, qualquer diâmetro</span>\nopenscad -o plate_135mm.stl \\\n  -D <span class="text-pool-300">\'part="plate"\'</span> \\\n  -D <span class="text-pool-300">\'plate_dia=135\'</span> fist_paddle.scad\n\n<span class="text-slate-500"># o gabarito — construa este primeiro</span>\nopenscad -o grip_fit_gauge.stl \\\n  -D <span class="text-pool-300">\'part="gripcheck"\'</span> fist_paddle.scad',
+
+    'con.eyebrow': 'Contribuindo',
+    'con.h': 'O que falta a este projeto é dado',
+    'con.p1': 'A contribuição mais útil é um <strong class="font-semibold text-ink-900 dark:text-white">relato de ajuste</strong>: dimensões da mão, os valores de parâmetro que funcionaram e o que você precisou mudar. Fotografias do dispositivo em uso, com consentimento, ajudam mais do que renderizações.',
+    'con.p2': 'Se você é profissional de saúde e algo aqui está errado, por favor abra uma issue.',
+    'con.cta': 'Abrir uma issue',
+    'con.lh': 'Uma limitação honesta',
+    'con.lp': 'Este é um dispositivo não regulamentado que vai no braço de uma pessoa com deficiência dentro d’água. Foi projetado a partir de princípios de engenharia, não da prática clínica, e foi testado por pouquíssimas pessoas. Funciona para o nadador para quem foi construído. Se funciona para mais alguém é uma questão genuinamente em aberto — e é por isso que o código, e não os STLs, é o que se entrega.',
+
+    'foot.tag': 'Hardware aberto para natação adaptada.',
+    'foot.repo': 'Repositório', 'foot.safety': 'Segurança', 'foot.lic': 'Licença: a definir'
+  };
+
+  var textNodes = Array.prototype.slice.call(document.querySelectorAll('[data-i18n]'));
+  var altNodes  = Array.prototype.slice.call(document.querySelectorAll('[data-i18n-alt]'));
+  var metaDesc  = document.querySelector('meta[name="description"]');
+  var buttons   = Array.prototype.slice.call(document.querySelectorAll('[data-lang]'));
+
+  // harvest the English already in the markup
+  var EN = {};
+  textNodes.forEach(function (el) { EN[el.getAttribute('data-i18n')] = el.innerHTML; });
+  altNodes.forEach(function (el) { EN[el.getAttribute('data-i18n-alt')] = el.getAttribute('alt'); });
+  EN['meta.title'] = document.title;
+  EN['meta.desc'] = metaDesc ? metaDesc.getAttribute('content') : '';
+
+  var DICT = { en: EN, pt: PT };
+  var ON  = ['bg-pool-600', 'text-white'];
+  var OFF = ['text-slate-500'];
+
+  function apply(lang) {
+    var d = DICT[lang] || EN;
+    textNodes.forEach(function (el) {
+      var v = d[el.getAttribute('data-i18n')];
+      if (v != null) el.innerHTML = v;
+    });
+    altNodes.forEach(function (el) {
+      var v = d[el.getAttribute('data-i18n-alt')];
+      if (v != null) el.setAttribute('alt', v);
+    });
+    if (d['meta.title']) document.title = d['meta.title'];
+    if (metaDesc && d['meta.desc']) metaDesc.setAttribute('content', d['meta.desc']);
+    document.documentElement.lang = (lang === 'pt') ? 'pt-BR' : 'en';
+
+    buttons.forEach(function (b) {
+      var on = b.getAttribute('data-lang') === lang;
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      ON.forEach(function (c) { b.classList.toggle(c, on); });
+      OFF.forEach(function (c) { b.classList.toggle(c, !on); });
+    });
+    try { localStorage.setItem('fgp-lang', lang); } catch (e) {}
+  }
+
+  var saved = null;
+  try { saved = localStorage.getItem('fgp-lang'); } catch (e) {}
+  var initial = (saved === 'pt' || saved === 'en') ? saved
+              : (/^pt/i.test(navigator.language || '') ? 'pt' : 'en');
+
+  buttons.forEach(function (b) {
+    b.addEventListener('click', function () { apply(b.getAttribute('data-lang')); });
+  });
+  apply(initial);
+})();
+</script>
+
+</body>
+</html>
